@@ -22,12 +22,15 @@ class Dataframe_pandas:
 
     @staticmethod
     def write_df_to_sql(dataframe, table, operation='REPLACE', column_str=None):
+        import json
         db_connection = Dbconnect()
         connection = db_connection.dbconnects()
 
         if connection:
             cursor = connection.cursor()
             try:
+                if table == 'customer_orders_bill':
+                    dataframe = dataframe.applymap(lambda x: json.dumps(x) if isinstance(x, list) else x)
                 tpls = [tuple(x) for x in dataframe.to_numpy()]
                 if not column_str:
                     cols = ','.join(list(dataframe.columns))

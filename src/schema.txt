@@ -106,3 +106,23 @@ INSERT INTO `roles_permissions` (`role_id`, `view`, `edit`, `delete`, `add`)
 VALUES
 (1, 1, 1, 1, 1),  -- Role 1 has all permissions (view, edit, delete, add)
 (2, 1, 0, 1, 0);  -- Role 2 has view and delete permissions only
+
+
+CREATE TABLE sell_product (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    sell_quantity INT NOT NULL,
+    unit_selling_price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE customer_orders_bill (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(255) NOT NULL,
+    customer_mobile VARCHAR(15) NOT NULL,
+    orders JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

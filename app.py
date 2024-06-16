@@ -84,5 +84,16 @@ def getData_common():
 def sidebar_menu_config():
     return GetData.sidebar_menu_config()
 
+
+@app.route('/protected', methods=['GET'])
+@app_decorator
+def protected_route(*args, **kwargs):
+    permissions = kwargs.get('permissions', {})
+
+    if permissions['view']:
+        return jsonify({'message': 'Access granted!'})
+    else:
+        return jsonify({'message': 'Insufficient permissions!'}), 403
+
 if __name__ == '__main__':
     app.run(debug=True)

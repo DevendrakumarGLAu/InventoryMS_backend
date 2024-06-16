@@ -7,10 +7,12 @@ from functools import wraps
 from src.DB_connect.dbconnection import Dbconnect
 from src.config import SECRET_KEY
 
+
 def fetch_roles_permissions(role_id):
     try:
         db_connection = Dbconnect()
         connection = db_connection.dbconnects()
+
         if connection:
             cursor = connection.cursor(dictionary=True)
             sql_query = f"""
@@ -22,9 +24,27 @@ def fetch_roles_permissions(role_id):
             permissions = cursor.fetchone()
             cursor.close()
             connection.close()
-            return permissions
+
+            if permissions:
+                permissions = {
+                    'view': bool(permissions['view']),
+                    'edit': bool(permissions['edit']),
+                    'delete': bool(permissions['delete']),
+                    'add': bool(permissions['add']),
+                }
+                return permissions
+            else:
+                return {
+                    'view': False,
+                    'edit': False,
+                    'delete': False,
+                    'add': False,
+                }
+
         else:
+            print("Error: Database connection failed.")
             return None
+
     except Exception as e:
         print(f"Error fetching roles permissions: {str(e)}")
         return None
@@ -51,6 +71,8 @@ def app_decorator(f):
             permissions = fetch_roles_permissions(current_role_id)
             if not permissions:
                 return jsonify({'message': 'Unauthorized access!'}), 403
+            # kwargs['permissions'] = permissions
+            return f(*args, **kwargs)
             # if required_permission not in permissions or not permissions[required_permission]:
             #     return jsonify({'message': 'Insufficient permissions!'}), 403
 
@@ -58,8 +80,6 @@ def app_decorator(f):
             return jsonify({'message': 'Token has expired!'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Invalid token!'}), 401
-        permissions = fetch_roles_permissions(current_role_id)
 
-        return f(*args, **kwargs)
-
+        # return f(*args, **kwargs)
     return decorated
