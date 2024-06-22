@@ -3,7 +3,7 @@
 import jwt
 from flask import request, jsonify
 from functools import wraps
-
+import traceback
 from src.DB_connect.dbconnection import Dbconnect
 from src.config import SECRET_KEY
 
@@ -32,8 +32,10 @@ def fetch_roles_permissions(role_id):
                     'delete': bool(permissions['delete']),
                     'add': bool(permissions['add']),
                 }
+                print(f"Fetched permissions: {permissions}")  # Print fetched permissions
                 return permissions
             else:
+                print(f"No permissions found for role_id: {role_id}")
                 return {
                     'view': False,
                     'edit': False,
@@ -46,8 +48,9 @@ def fetch_roles_permissions(role_id):
             return None
 
     except Exception as e:
-        print(f"Error fetching roles permissions: {str(e)}")
-        return None
+        # print(f"Error fetching roles permissions: {str(e)}")
+        return traceback.format_exc() # Print detailed exception traceback
+        # return None
 
 def app_decorator(f):
     @wraps(f)

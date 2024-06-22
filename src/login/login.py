@@ -48,7 +48,3 @@ WHERE u.email = '{email}' AND u.password = '{password}';
                 connection.close()
         else:
             return {"error": "Failed to connect to the database"}
-
-
-
-

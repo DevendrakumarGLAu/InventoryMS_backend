@@ -105,4 +105,9 @@ class Routes:
         result = GetData.getData_common(id,Table_name)
         return result
 
+    @staticmethod
+    def sidebar_menu_config(request):
+        AccountId = Fetchparameters.fetch_parameter(request,'id', type = int)
+        return GetData.sidebar_menu_config(AccountId)
+
 
