@@ -32,3 +32,4 @@ Flask-Cors==3.0.10
 PyJWT==2.2.0
 gunicorn==22.0.0
 python-dotenv==1.0.1
+numpy==1.24.4
