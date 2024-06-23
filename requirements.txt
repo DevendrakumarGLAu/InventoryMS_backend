@@ -30,4 +30,5 @@ requests==2.28.1
 mysql-connector-python
 Flask-Cors==3.0.10
 PyJWT==2.2.0
-gunicorn
+gunicorn==22.0.0
+python-dotenv==1.0.1
