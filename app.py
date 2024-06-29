@@ -98,5 +98,5 @@ def protected_route(*args, **kwargs):
 
 
 if __name__ == '__main__':
-    app.run(host="121.1.2.4", port=5000)
+    app.run(host='0.0.0.0', port=5000)
 
