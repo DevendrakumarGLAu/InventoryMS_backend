@@ -97,6 +97,6 @@ def protected_route(*args, **kwargs):
         return jsonify({'message': 'Insufficient permissions!'}), 403
 
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(host="121.1.2.4", port=5000)
 
