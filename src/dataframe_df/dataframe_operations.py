@@ -40,7 +40,7 @@ class Dataframe_pandas:
                 vals = ','.join(['%s'] * len(dataframe.columns))
                 sql = f" {operation} INTO %s(%s) VALUES(%s)" % (table, cols, vals)
 
-                cursor.execute('set GLOBAL max_allowed_packet=67108864')
+                # cursor.execute('set GLOBAL max_allowed_packet=67108864')
                 cursor.executemany(sql, tpls)
                 connection.commit()
                 return {

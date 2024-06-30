@@ -107,7 +107,7 @@ class Routes:
 
     @staticmethod
     def sidebar_menu_config(request):
-        AccountId = Fetchparameters.fetch_parameter(request,'id', type = int)
+        AccountId = Fetchparameters.fetch_parameter(request,'id', type = str)
         return GetData.sidebar_menu_config(AccountId)
 
 
