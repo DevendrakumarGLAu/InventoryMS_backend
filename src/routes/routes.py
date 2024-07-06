@@ -86,11 +86,9 @@ class Routes:
 
     @staticmethod
     def save_order(request):
-        name = Fetchparameters.fetch_parameter(request,'name', type = str)
-        mobile = Fetchparameters.fetch_parameter(request, 'mobile', type=str)
-        data = request.get_json()
-        orders = data["orders"]
-        result = Bill_payments.save_orders(name,mobile,orders)
+        table_name = Fetchparameters.fetch_parameter(request,'table_name', type = str)
+        column_data = Fetchparameters.fetch_parameter(request, 'column_data', type=str)
+        result = Bill_payments.save_orders(table_name,column_data)
         return result
 
     @staticmethod

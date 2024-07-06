@@ -27,7 +27,7 @@ class Dbconnect:
                 print(f"Connected to MySQL Server version {db_info}")
                 return connection
         except mysql.connector.Error as err:
-            # print(f"Error connecting to MySQL: {err}")
+            print(f"Error connecting to MySQL: {err}")
             logging.debug(f"""mysql error {err}""")
             raise err
 

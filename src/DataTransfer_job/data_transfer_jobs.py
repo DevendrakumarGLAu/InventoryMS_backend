@@ -43,16 +43,11 @@ class DataTransfer:
                 validation_result = Validators.validate_vendor_data(column_data, connection, table_name)
                 if validation_result['status'] == 'error':
                     return validation_result
-            # if table_name == 'users_details':
-            #     validation_result = Validators.Validator_userDetails(column_data, connection,table_name)
-            #     if validation_result['status'] == 'error':
-            #         return validation_result
             if table_name == 'category' or table_name == 'productname':
                 new_name = column_data['name']
                 duplicate_check_result = DataTransfer.check_duplicate(table_name,new_name)
                 if duplicate_check_result['status'] == 'error':
                     return duplicate_check_result
-
             if connection:
                 column_data_json =column_data
                 data_set = pd.json_normalize(column_data_json)
@@ -80,15 +75,13 @@ class DataTransfer:
                 cursor = connection.cursor()
                 if not isinstance(row_id, int):
                     return {'status': 'Error', 'message': 'Row ID must be an integer'}
-
                 delete_sql = f"DELETE FROM {table_name} WHERE id = {row_id}"
-                cursor.execute(delete_sql)  # Corrected method name
+                cursor.execute(delete_sql)
                 connection.commit()
                 if cursor.rowcount == 0:
                     return {'status': 'Error', 'message': 'No data found to delete'}
                 else:
                     return {'status': 'success', 'message': 'Data deleted successfully'}
-                # return {'status': 'success', 'message': message}
             except Exception as e:
                 return {'status': 'error', 'message': str(e)}
         else:
@@ -197,13 +190,14 @@ class DataTransfer:
             db_connection = Dbconnect()
             connection = db_connection.dbconnects()
             if connection:
-                # Convert column_data to a DataFrame
-                data_df = pd.DataFrame([column_data])
-
-                # Construct the SET clause for the SQL update query
-                set_clause = ', '.join([f"{key} = '{value}'" for key, value in column_data.items()])
-
-                # Construct the SQL update query
+                if table_name == 'customer_orders_bill':
+                    orders = column_data.pop('orders', [])
+                    orders_json = json.dumps(orders)
+                    set_clause = ', '.join([f"{key} = '{value}'" for key, value in column_data.items()])
+                    set_clause += f", orders = '{orders_json}'"
+                else:
+                    set_clause = ', '.join([f"{key} = '{value}'" for key, value in column_data.items()])
+                # data_df = pd.DataFrame([column_data])
                 update_query = f"UPDATE {table_name} SET {set_clause} WHERE id = {row_id}"
 
                 # Execute the update query
