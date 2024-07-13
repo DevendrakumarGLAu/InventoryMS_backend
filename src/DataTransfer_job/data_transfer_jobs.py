@@ -48,6 +48,21 @@ class DataTransfer:
                 duplicate_check_result = DataTransfer.check_duplicate(table_name,new_name)
                 if duplicate_check_result['status'] == 'error':
                     return duplicate_check_result
+            if table_name == 'add_product_details':
+                category_id = column_data['category']
+                product_id = column_data['productName']
+                query = f"""select * from {table_name} where '{category_id}' and productName = '{product_id}' """
+                result = Dataframe_pandas.read_sql_as_df(query)
+                if not result.empty:
+                    query = f"""select * from productname where id = {product_id}"""
+                    product_result = Dataframe_pandas.read_sql_as_df(query)
+                    if not product_result.empty:
+                        product_name = product_result['name'].iloc[0]
+                        return {
+                            "status":'error', 'message':f"{product_name} already exists! Please update in list"
+                        }
+                # else:
+
             if connection:
                 column_data_json =column_data
                 data_set = pd.json_normalize(column_data_json)
@@ -64,7 +79,10 @@ class DataTransfer:
             }
 
         except Exception as e:
-            raise e
+            return {
+                "status": 'error',
+                "message": str(e)
+            }
 
     @staticmethod
     def delete_data_operation(table_name, row_id):
@@ -208,7 +226,7 @@ class DataTransfer:
                 if cursor.rowcount > 0:
                     return {'status': 'success', 'message': 'Data updated successfully'}
                 else:
-                    return {'status': 'error', 'message': 'No rows were updated'}
+                    return {'status': 'success', 'message': 'No rows were updated'}
             else:
                 return {'status': 'error', 'message': 'Failed to connect to the database'}
         except Exception as e:
