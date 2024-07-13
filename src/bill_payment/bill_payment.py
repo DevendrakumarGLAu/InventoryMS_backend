@@ -9,27 +9,66 @@ class Bill_payments:
             connection = Dbconnect.dbconnects()
             if connection:
                 cursor = connection.cursor()
-                total_bill_price = 0
-                # Iterate over each order in column_data['orders']
+
                 for order in column_data['orders']:
                     category_id = order['category_id']
                     product_id = order['product_id']
                     quantity = int(order['quantity'])
                     selling_price = float(order['selling_price'])
+                    cursor.execute(
+                        f"SELECT total_bill_price FROM add_product_details WHERE category = '{category_id}' AND productname = '{product_id}'"
+                    )
+                    result = cursor.fetchone()
+                    if result:
+                        current_total_bill_price = float(result[0])  # Convert to float
+                    else:
+                        current_total_bill_price = 0.0
+
+                    # Fetch product name from products array
+                    product_name = next(
+                        (product['product_name'] for product in order['products'] if
+                         str(product['product_id']) == product_id),
+                        ''
+                    )
+                    if not product_name:
+                        return {
+                            'status': 'error',
+                            'message': f"Product name not found for product_id: {product_id}"
+                        }
+
+                    # Check available quantity
+                    cursor.execute(
+                        f"SELECT quantity FROM add_product_details WHERE category = '{category_id}' AND productName = '{product_id}'"
+                    )
+                    result = cursor.fetchone()
+                    if result:
+                        available_quantity = int(result[0])
+                    else:
+                        available_quantity = 0
+
+                    if quantity > available_quantity:
+                        return {
+                            'status': 'error',
+                            'message': f"Cannot sell {quantity} units of {product_name}. Only {available_quantity} units available."
+                        }
 
                     total_selling_price = quantity * selling_price
-                    total_bill_price += total_selling_price
-                    update_query = f"""
+                    new_total_bill_price = current_total_bill_price + total_selling_price
+
+                    # Update product details and total bill price
+                    cursor.execute(
+                        f"""
                         UPDATE add_product_details 
                         SET quantity = quantity - {quantity},
                             selling_price = {selling_price},
                             total_selling_price = {total_selling_price},
-                            total_bill_price = {total_bill_price}
+                            total_bill_price = {new_total_bill_price}
                         WHERE category = '{category_id}' AND productname = '{product_id}'
-                    """
-                    cursor.execute(update_query)
-                    print(f"Executed query: {update_query}")
+                        """
+                    )
+                    # print(f"Executed query: {update_query}")
                     connection.commit()
+
                 return {'status': 'success', 'message': 'Orders saved successfully'}
             else:
                 return {'status': 'error', 'message': 'Failed to connect to the database'}

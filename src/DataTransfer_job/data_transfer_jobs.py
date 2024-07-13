@@ -195,12 +195,11 @@ class DataTransfer:
                     orders_json = json.dumps(orders)
                     set_clause = ', '.join([f"{key} = '{value}'" for key, value in column_data.items()])
                     set_clause += f", orders = '{orders_json}'"
+                elif table_name == 'add_product_details':
+                    set_clause = DataTransfer.construct_set_clause_for_product_details(row_id,table_name,column_data)
                 else:
                     set_clause = ', '.join([f"{key} = '{value}'" for key, value in column_data.items()])
-                # data_df = pd.DataFrame([column_data])
                 update_query = f"UPDATE {table_name} SET {set_clause} WHERE id = {row_id}"
-
-                # Execute the update query
                 cursor = connection.cursor()
                 cursor.execute(update_query)
                 connection.commit()
@@ -214,3 +213,43 @@ class DataTransfer:
                 return {'status': 'error', 'message': 'Failed to connect to the database'}
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
+
+    @staticmethod
+    def construct_set_clause_for_product_details(row_id,table_name,column_data):
+        # Extract relevant fields from column_data
+        category = column_data.get('category')
+        productName = column_data.get('productName')
+        manufacturingDate = column_data.get('manufacturingDate')
+        expiryDate = column_data.get('expiryDate')
+        update_boxes = int(column_data.get('boxes'))  # Convert to int
+        update_packing = int(column_data.get('packing'))  # Convert to int
+        update_tablets = int(column_data.get('tablets'))  # Convert to int
+        try:
+            db_connection = Dbconnect()
+            connection = db_connection.dbconnects()
+            if connection:
+                cursor = connection.cursor()
+                query =f"SELECT * FROM {table_name} WHERE id = '{row_id}'"
+                existing_record = Dataframe_pandas.read_sql_as_df(query)
+                if not existing_record.empty:
+                    existing_quantity = existing_record['quantity'].iloc[0]  # Assuming quantity field exists in the record
+                    existing_boxes = existing_record['boxes'].iloc[0]
+                    existing_packing = existing_record['packing'].iloc[0]
+                    existing_tablets = existing_record['tablets'].iloc[0]
+                    new_quantity = update_boxes * update_packing * update_tablets
+                    previous_add_qty = int(existing_boxes) * int(existing_packing) * int(existing_tablets)
+                    quantity_change = int(previous_add_qty) - int(new_quantity)
+                    if previous_add_qty > new_quantity:
+                        update_qty = int(existing_quantity) - quantity_change
+                    else:
+                        update_qty = int(existing_quantity) + abs(quantity_change)
+                    set_clause = ', '.join(
+                        [f"{key} = '{value}'" for key, value in column_data.items() if key != 'quantity'])
+                    set_clause += f", quantity = '{update_qty}'"
+                    return set_clause
+                else:
+                    raise Exception("Record with id not found in the database")
+            else:
+                raise Exception("Failed to connect to the database")
+        except Exception as e:
+            raise Exception(f"Error in construct_set_clause_for_product_details: {str(e)}")
