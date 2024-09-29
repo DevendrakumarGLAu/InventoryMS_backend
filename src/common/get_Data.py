@@ -11,20 +11,27 @@ from src.dataframe_df.dataframe_operations import Dataframe_pandas
 
 class GetData:
     @staticmethod
-    def getData_common(id, Table_name):
+    def getData_common(id,Table_name,filter_condition,limit,column_string):
         try:
             if id:
                 sql_query = f"""SELECT * FROM {Table_name} WHERE id = {id}"""
             else:
-                if Table_name == 'add_product_details':
+                if Table_name == 'add_product_details1':
                     sql_query = f"""SELECT apd.id, apd.quantity, apd.price, apd.manufacturingDate, apd.expiryDate, c.name AS category, p.name AS productName
                                 FROM add_product_details apd
                                 LEFT JOIN category c ON apd.category = c.id
                                 LEFT JOIN productname p ON apd.productName = p.id
                                 ORDER BY apd.id desc;"""
                 else:
-                    sql_query = f"""SELECT * FROM {Table_name} ORDER BY id DESC"""
-            print(sql_query)
+                    if column_string:
+                        sql_query = f"SELECT {column_string} FROM {Table_name}"
+                    else:
+                        sql_query = f"SELECT * FROM {Table_name}"
+                    if filter_condition:
+                        sql_query += f" {filter_condition}"
+                    if limit is not None:
+                        sql_query += f" LIMIT {limit}"
+                    print(sql_query)
             # Pass the id parameter to the read_sql_as_df function
             df = Dataframe_pandas.read_sql_as_df(sql_query)
             if df is not None:

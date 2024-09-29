@@ -100,7 +100,10 @@ class Routes:
     def getData_common(request):
         id = Fetchparameters.fetch_parameter(request,'id', type = int)
         Table_name = Fetchparameters.fetch_parameter(request, 'Table_name', type=str)
-        result = GetData.getData_common(id,Table_name)
+        filter_condition = Fetchparameters.fetch_parameter(request, 'filter_condition', type=str)
+        column_string = Fetchparameters.fetch_parameter(request, 'column_string', type=str)
+        limit = Fetchparameters.fetch_parameter(request, 'limit', type=int)
+        result = GetData.getData_common(id,Table_name,filter_condition,limit,column_string)
         return result
 
     @staticmethod
